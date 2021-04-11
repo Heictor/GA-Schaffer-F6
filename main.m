@@ -1,13 +1,26 @@
 %%main
 clc, clear, close all
 format long;
-
+rng default % For reproducibility
 %% Utilização da Função Fitness no GA
 FitFcn = @myFitness; %Função chamada
+
 nvars = 2; %Número de variáveis
+
 lb=-100; %Limite Inferior (Lower Boundary)
 ub=100; %Limite Superior  (Upper Boundary)
-[T, fval] = ga(FitFcn,nvars,[],[],[],[],lb,ub)
+
+Scale = 1; % Dispersão da população inicial
+Shrink = 1; % Mutação
+
+options = optimoptions('ga',...
+    'MutationFcn',{@mutationgaussian Scale Shrink},...
+    'PlotFcn',{@gaplotdistance,@gaplotrange},...
+    'MaxStallGenerations',200,...
+    'MaxGenerations',200); % to get a long run
+
+% FunçãoGa = ga(fun,nvars,A,b,Aeq,beq,lb,ub,nonlcon,options)
+[T, fval] = ga(FitFcn,nvars,[],[],[],[],lb,ub,[],options)
 
 %% Utilização da Expressão Simbólica
 
