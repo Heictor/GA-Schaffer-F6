@@ -1,4 +1,4 @@
-function [ best_fitness , elite , generation , last_generation, cost] = my_ga ( ...
+function [ best_fitness , elite , generation , last_generation, cost, population, custo, index, costo, pops] = my_ga ( ...
     number_of_variables , ...     % O número de parâmetros para resolver o problema
     fitness_function , ...        % Nome da função Fitness
     population_size , ...         % Tamanho daa população (número de indivíduos em cada geração)
@@ -7,7 +7,8 @@ function [ best_fitness , elite , generation , last_generation, cost] = my_ga ( 
     maximal_generation , ...      % maximum evolution algebra
     minimal_cost  ...             % Minímo valor de mudança (the smaller the function value, the higher the fitness)
 )
-
+format long
+rng default
 % Probabilidade cumulativa
 % Assuming parent_number = 10
 % Numerator parent_number: -1:1 is used to generate a number sequence
@@ -25,7 +26,7 @@ cumulative_probabilities = cumsum((parent_number:- 1 : 1 ) / sum(parent_number:-
 
 % Melhores fitness
 % Os melhores valores de Fitness de cada geração, valor inicial definido em 1
-best_fitness = ones(maximal_generation, 1 );
+best_fitness = 0.5*(ones(maximal_generation, 1 ));
 
 % Elite
 % Os valors de parâmetros da Elite de cada geração são iniciadas em 0
@@ -38,21 +39,26 @@ child_number = population_size - parent_number; % Número de crianças em cada g
 % População Inicial
 % population_size corresponde às linhas da matrix, cada linha representa 1 indivíduo, o número de linhas = o número de indivíuos (Número da população)
 % number_of_variables corresponde às colunas da matrix, o número de colunas = número de parâmetros (individual characteristics are represented by these parameters)
-population = rand(population_size, number_of_variables);
-
+population = -100 + (100+100)*rand([population_size, number_of_variables]);
+%0.5 + (1+1)*
 last_generation = 0; % Grava o número e gerações ao terminar o loop
-
+pops = [];
 custo = [];
+costo = [];
 %A próxima etapa do código será repetida dentro do loop 
-for generation = 1  : maximal_generation % Ciclo da evolução inicia
-    
+for generation = 1 : 1 : maximal_generation % Ciclo da evolução inicia
     % feval traz os dados para uma function handle definida para cálculo
     % Traz a matrix da População para o cálculo da função fitness_function 
-    cost = feval(fitness_function, population); % Calcula o fitness de todos os indivíduos (population_size*1 matrix)
+    for po = 1:1:length(population)
+        pops = [pops; [population(po,1),population(po,2)]];
+        costo = [costo,(0.5+((((sin (sqrt (population(po,1).^2+population(po,2).^2) )).^2) - 0.5)/(1 + 0.001*(population(po,1).^2+population(po,2).^2)).^2))];
+            %feval(fitness_function, [population(po,1),population(po,2) ] ) ];
+    end
+    cost = feval(fitness_function, population); % Calcula o fitness (média) de todos os indivíduos (population_size*1 matrix)
     custo = [custo, cost];
     % index grava os números originais das linha para cada valor após a ordenação
-    [cost, index] = sort(cost); % Ordena os valores da função fitness dos menores aos maiores
-
+    [cost, index] = sort(cost) % Ordena os valores da função fitness dos menores aos maiores
+    %index tá ficando só 1x1
     % index(1:parent_number)
     % The number of rows in the population of the first parent_number individuals with a smaller cost
     % Select this part (parent_number) individuals as parents, in fact, parent_number corresponds to the cross probability
@@ -61,7 +67,7 @@ for generation = 1  : maximal_generation % Ciclo da evolução inicia
 
     % cost after the previous sort sorting, the matrix has been changed to ascending order
     % cost(1) is the best fitness for this generation
-    best_fitness(generation) = cost( 1 ); % Record the best fitness of this generation
+    best_fitness(generation) = (1/(cost))/2; % Record the best fitness of this generation
 
     %The first line of population matrix is ​​the elite individuals of this generation
     elite(generation, :) = population( 1 , :); % Grava as soluções ótimas para a geração atual(elite)
@@ -111,7 +117,7 @@ for generation = 1  : maximal_generation % Ciclo da evolução inicia
     % Chromosome variation starts
     
     % Variation population
-    mutation_population = population( 2 :population_size, :); % elites do not participate in mutation, so start from 2
+    mutation_population = population( 1 :population_size, :); % elites do not participate in mutation, so start from 2
     
     number_of_elements = (population_size -  1 ) * number_of_variables; % number of all genes
     number_of_mutations = ceil(number_of_elements * mutation_rate); % The number of mutated genes (total number of genes * mutation rate)
@@ -122,8 +128,8 @@ for generation = 1  : maximal_generation % Ciclo da evolução inicia
     
     % The selected genes are replaced by a random number to complete the mutation
     mutation_population(mutation_points) = rand( 1 , number_of_mutations); % Perform mutation operations on selected genes
-    
-    population( 2 :population_size, :) = mutation_population; % population after mutation
+    disp("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    population( 1 :population_size, :) = mutation_population; % population after mutation
     
     % End of chromosome variation
    
