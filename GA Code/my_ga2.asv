@@ -11,8 +11,7 @@ function [ best_fitness ,...
            generation_fitness,...
            population_cost,...
            population_index,...
-           population_size,...
-           pop] = my_ga2 ( ...
+           population_size] = my_ga2 ( ...
     number_of_variables , ...     % O número de parâmetros para resolver o problema
     fitness_function , ...        % Nome da função Fitness
     population_size , ...         % Tamanho daa população (número de indivíduos em cada geração)
@@ -62,7 +61,7 @@ cost = 0;
 population_fitness = [];
 index = 0;
 costo = 0;
-pop = [];
+
 generation_fitness = [];
 population_cost = [];
 population_index = [];
@@ -80,8 +79,6 @@ for i = 1:1:maximal_generation
         population_fitness = [population_fitness; feval(fitness_function, [population(k,1) population(k,2)])]; 
         [population_cost, population_index] = sort(population_fitness);
         
-        % FAZER UMA MATRIZ COM VALORES MÉDIOS E PIORES VALORES DE FITNESS
-        
         %Matrix que armazena os valores de fitness de cada indivíduo na
         %geração "i" atual
         generation_fitness(k,:) = feval(fitness_function, [population(k,1) population(k,2)]);
@@ -96,42 +93,41 @@ for i = 1:1:maximal_generation
     
     %Cruzamento das Indivíduos
     for child=1:2:child_number
-        %PEGAR MÃE E PAI DOS MELHORES VALORES OU MÉDIOS
-        mother = population( ceil((length(population))/2),: );
-        father = population( ceil((length(population)-1)/2),: );
-       
-        %mother = find(cumulative_probabilities > rand, 1 ) % choose a better mother
-        %father = find(cumulative_probabilities > rand, 1 ) % choose a better father
+%      mother = population( ceil((length(population))/2),: )
+% 
+%      father = population( ceil((length(population)-1)/2),: )
+       mother = find(cumulative_probabilities > rand, 1 ) % choose a better mother
+       father = find(cumulative_probabilities > rand, 1 ) % choose a better father
 
-        crossover_point = ceil(rand*number_of_variables);
-        mask1 = [ones( 1 , crossover_point), zeros( 1 , number_of_variables - crossover_point)];
-        mask2 = not(mask1) ;
+       crossover_point = ceil(rand*number_of_variables);
+%      mask1 = [ones( 1 , crossover_point), zeros( 1 , number_of_variables - crossover_point)];
+%      mask2 = not(mask1) ;
         
-        % Get 4 separate chromosomes
-        % Attention is.*
-        %mother_1 = mask1 .* population(mother, :); % The front part of the mother chromosome
-        %mother_2 = mask2 .* population(mother, :); % The posterior part of the mother chromosome
+       % Get 4 separate chromosomes
+       % Attention is.*
+       %mother_1 = mask1 .* population(mother, :); % The front part of the mother chromosome
+       %mother_2 = mask2 .* population(mother, :); % The posterior part of the mother chromosome
         
-        %father_1 = mask1 .* population(father, :); % The first part of the father's chromosome
-        %father_2 = mask2 .* population(father, :); % The latter part of the father's chromosome
-        %Minha implementação
-        %mask1 = [1 0];
-        %mask2 = [0 1]; 
-        mother_1 = mask1 .* mother; % The front part of the mother chromosome
-        mother_2 = mask2 .* mother; % The posterior part of the mother chromosome
+       %father_1 = mask1 .* population(father, :); % The first part of the father's chromosome
+       %father_2 = mask2 .* population(father, :); % The latter part of the father's chromosome
+       %Minha implementação
+       mask1 = [1 0];
+       mask2 = [0 1]; 
+       mother_1 = mask1 .* mother % The front part of the mother chromosome
+       mother_2 = mask2 .* mother % The posterior part of the mother chromosome
          
-        father_1 = mask1 .* father; % The front part of the mother chromosome
-        father_2 = mask2 .* father; % The posterior part of the mother chromosome 
+       father_1 = mask1 .* father % The front part of the mother chromosome
+       father_2 = mask2 .* father % The posterior part of the mother chromosome 
        
-        population(parent_number + child, :) = mother_1 + father_2; % a child
-        population(parent_number+child+ 1 , :) = mother_2 + father_1;
+       population(parent_number + child, :) = mother_1 + father_2 % a child
+       population(parent_number+child+ 1 , :) = mother_2 + father_1
     end    
     
     % Chromosome variation starts
     % Variation population
     mutation_population = population( 2 :population_size, :); % elites do not participate in mutation, so start from 2
     
-    number_of_elements = (population_size -  1 ) * number_of_variables; % number of all genes that may be muted
+    number_of_elements = (population_size -  1 ) * number_of_variables; % number of all genes
     number_of_mutations = ceil(number_of_elements * mutation_rate); % The number of mutated genes (total number of genes * mutation rate)
     
     % rand(1, number_of_mutations) Generate a matrix of number_of_mutations random numbers (range 0-1) (1*number_of_mutations)
@@ -141,7 +137,7 @@ for i = 1:1:maximal_generation
     % The selected genes are replaced by a random number to complete the mutation
     mutation_population(mutation_points) = rand( 1 , number_of_mutations);
     
-    population( 2 :population_size, :) = mutation_population % population after mutation
+    population( 2 :population_size, :) = mutation_population; % population after mutation
     
 %   % Variation population
 %   mutation_population = population( 1 :population_size, :); % elites do not participate in mutation, so start from 2
